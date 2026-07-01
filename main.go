@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/ivvenger/todo-cli/task"
 )
@@ -9,43 +11,75 @@ import (
 func main() {
 	storage := task.NewStorage("tasks.json")
 
-	t1, err := storage.Add("убрать дом")
-	if err != nil {
-		fmt.Println("Ошибка: ", err)
-		return
+	if len(os.Args) < 2 {
+		fmt.Println("Укажите команду: add, list, done или rm")
+		os.Exit(1)
 	}
-	fmt.Printf("Добавлена задача %d: %s\n", t1.ID, t1.Title)
 
-	t2, err := storage.Add("сходить на почту")
-	if err != nil {
-		fmt.Println("Ошибка: ", err)
-		return
-	}
-	fmt.Printf("Добавлена задача %d: %s\n", t2.ID, t2.Title)
+	command := os.Args[1]
 
-	if err := storage.Complete(t1.ID); err != nil {
-		fmt.Println("Ошибка: ", err)
-		return
-	}
-	fmt.Printf("Задача %d выполнена!\n", t1.ID)
-
-	tasks, err := storage.All()
-	if err != nil {
-		fmt.Println("Ошибка: ", err)
-		return
-	}
-	fmt.Println("Список задач:")
-	for _, t := range tasks {
-		status := " "
-		if t.Done {
-			status = "✓"
+	switch command {
+	case "add":
+		if len(os.Args) < 3 {
+			fmt.Println("Укажите текст задачи: todo add \"текст\"")
+			os.Exit(1)
 		}
-		fmt.Printf("[%s] %d: %s\n", status, t.ID, t.Title)
+		title := os.Args[2]
+		t, err := storage.Add(title)
+		if err != nil {
+			fmt.Println("Ошибка при добавлении:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Добавлена задача [%d]: %s\n", t.ID, t.Title)
+	case "list":
+		tasks, err := storage.All()
+		if err != nil {
+			fmt.Println("Ошибка при чтении списка:", err)
+			os.Exit(1)
+		}
+		if len(tasks) == 0 {
+			fmt.Println("Список задач пуст")
+			return
+		}
+		for _, t := range tasks {
+			status := " "
+			if t.Done {
+				status = "x"
+			}
+			fmt.Printf("[%s] %d: %s\n", status, t.ID, t.Title)
+		}
+	case "done":
+		if len(os.Args) < 3 {
+			fmt.Println("Укажите ID задачи: todo done <id>")
+			os.Exit(1)
+		}
+		id, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			fmt.Println("ID должен быть числом")
+			os.Exit(1)
+		}
+		if err := storage.Complete(id); err != nil {
+			fmt.Println("Ошибка:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Задача %d отмечена выполненной!\n", id)
+	case "rm":
+		if len(os.Args) < 3 {
+			fmt.Println("Укажите ID задачи: todo rm <id>")
+			os.Exit(1)
+		}
+		id, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			fmt.Println("ID должен быть числом")
+			os.Exit(1)
+		}
+		if err := storage.Delete(id); err != nil {
+			fmt.Println("Ошибка:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Задача %d удалена!\n", id)
+	default:
+		fmt.Printf("Неизвестная команда: %s\n", command)
+		os.Exit(1)
 	}
-
-	if err := storage.Delete(t2.ID); err != nil {
-		fmt.Println("Ошибка: ", err)
-		return
-	}
-	fmt.Printf("Запись %d - удалена!\n", t2.ID)
 }
