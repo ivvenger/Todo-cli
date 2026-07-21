@@ -2,20 +2,28 @@ package task
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
+// Add добавляет новую задачу в хранилище и возвращает её.
+// Пустой (или состоящий из пробелов) заголовок отклоняется.
 func (s *Storage) Add(title string) (Task, error) {
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return Task{}, ErrEmptyTitle
+	}
+
 	tasks, err := s.Load()
 	if err != nil {
 		return Task{}, err
-	} 
-	
+	}
+
 	newTask := Task{
-		ID:			nextID(tasks),
-		Title:		title,
-		Done:		false,
-		CreatedAt:	time.Now(),
+		ID:        nextID(tasks),
+		Title:     title,
+		Done:      false,
+		CreatedAt: time.Now(),
 	}
 
 	tasks = append(tasks, newTask)
@@ -27,10 +35,49 @@ func (s *Storage) Add(title string) (Task, error) {
 	return newTask, nil
 }
 
+// Complete помечает задачу с указанным ID выполненной.
+func (s *Storage) Complete(id int) error {
+	tasks, err := s.Load()
+	if err != nil {
+		return err
+	}
 
-func nextID(tasks []Task) int{
+	i := findIndex(tasks, id)
+	if i < 0 {
+		return fmt.Errorf("id %d: %w", id, ErrTaskNotFound)
+	}
+
+	tasks[i].Done = true
+	return s.Save(tasks)
+}
+
+// Delete удаляет задачу с указанным ID.
+func (s *Storage) Delete(id int) error {
+	tasks, err := s.Load()
+	if err != nil {
+		return err
+	}
+
+	i := findIndex(tasks, id)
+	if i < 0 {
+		return fmt.Errorf("id %d: %w", id, ErrTaskNotFound)
+	}
+
+	tasks = append(tasks[:i], tasks[i+1:]...)
+	return s.Save(tasks)
+}
+
+// All возвращает все задачи из хранилища.
+func (s *Storage) All() ([]Task, error) {
+	return s.Load()
+}
+
+// --- Чистые функции: без обращения к файлу, легко тестируются ---
+
+// nextID возвращает следующий свободный ID (максимальный + 1).
+func nextID(tasks []Task) int {
 	maxID := 0
-	for _, t := range(tasks) {
+	for _, t := range tasks {
 		if t.ID > maxID {
 			maxID = t.ID
 		}
@@ -38,50 +85,23 @@ func nextID(tasks []Task) int{
 	return maxID + 1
 }
 
-
-func (s *Storage) Complete(id int) error {
-	tasks, err := s.Load()
-	if err != nil {
-		return err
-	}
-
+// findIndex возвращает индекс задачи с данным ID или -1, если не найдена.
+func findIndex(tasks []Task, id int) int {
 	for i := range tasks {
 		if tasks[i].ID == id {
-			tasks[i].Done = true;
-			return s.Save(tasks)
+			return i
 		}
 	}
-
-	return fmt.Errorf("Задача с ID %d не найдена", id)
+	return -1
 }
 
-
-func (s *Storage) Delete(id int) error{
-	tasks, err := s.Load()
-	if err != nil {
-		return err
-	}
-
-	newTasks := make([]Task, 0, len(tasks))
-	found := false 
-
+// FilterByStatus возвращает задачи, у которых поле Done равно done.
+func FilterByStatus(tasks []Task, done bool) []Task {
+	result := make([]Task, 0, len(tasks))
 	for _, t := range tasks {
-		if t.ID == id {
-			found = true 
-			continue 
+		if t.Done == done {
+			result = append(result, t)
 		}
-		newTasks = append(newTasks, t)
 	}
-
-	if !found {
-		return fmt.Errorf("Задача с ID %d не найдена", id)
-	}
-
-	return s.Save(newTasks)
+	return result
 }
-
-
-func (s *Storage) All() ([]Task, error) {
-	return s.Load()
-}
-
