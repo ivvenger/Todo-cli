@@ -8,10 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// storage инициализируется в PersistentPreRun перед запуском любой команды.
 var storage *task.Storage
 
-// dbPath — путь к JSON-файлу с задачами, задаётся флагом --file.
 var dbPath string
 
 var rootCmd = &cobra.Command{
@@ -30,8 +28,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&dbPath, "file", "tasks.json", "путь к файлу с задачами")
 }
 
-// Execute запускает корневую команду. При ошибке печатает её в stderr
-// и завершает процесс с кодом 1.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "ошибка:", err)
