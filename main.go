@@ -1,4 +1,3 @@
-// Package main — точка входа CLI-утилиты todo.
 package main
 
 import "github.com/ivvenger/todo-cli/cmd"
