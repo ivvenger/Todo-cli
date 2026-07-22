@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-// Add добавляет новую задачу в хранилище и возвращает её.
-// Пустой (или состоящий из пробелов) заголовок отклоняется.
 func (s *Storage) Add(title string) (Task, error) {
 	title = strings.TrimSpace(title)
 	if title == "" {
@@ -35,7 +33,6 @@ func (s *Storage) Add(title string) (Task, error) {
 	return newTask, nil
 }
 
-// Complete помечает задачу с указанным ID выполненной.
 func (s *Storage) Complete(id int) error {
 	tasks, err := s.Load()
 	if err != nil {
@@ -51,7 +48,6 @@ func (s *Storage) Complete(id int) error {
 	return s.Save(tasks)
 }
 
-// Delete удаляет задачу с указанным ID.
 func (s *Storage) Delete(id int) error {
 	tasks, err := s.Load()
 	if err != nil {
@@ -67,14 +63,10 @@ func (s *Storage) Delete(id int) error {
 	return s.Save(tasks)
 }
 
-// All возвращает все задачи из хранилища.
 func (s *Storage) All() ([]Task, error) {
 	return s.Load()
 }
 
-// --- Чистые функции: без обращения к файлу, легко тестируются ---
-
-// nextID возвращает следующий свободный ID (максимальный + 1).
 func nextID(tasks []Task) int {
 	maxID := 0
 	for _, t := range tasks {
@@ -85,7 +77,6 @@ func nextID(tasks []Task) int {
 	return maxID + 1
 }
 
-// findIndex возвращает индекс задачи с данным ID или -1, если не найдена.
 func findIndex(tasks []Task, id int) int {
 	for i := range tasks {
 		if tasks[i].ID == id {
@@ -95,7 +86,6 @@ func findIndex(tasks []Task, id int) int {
 	return -1
 }
 
-// FilterByStatus возвращает задачи, у которых поле Done равно done.
 func FilterByStatus(tasks []Task, done bool) []Task {
 	result := make([]Task, 0, len(tasks))
 	for _, t := range tasks {
