@@ -6,18 +6,14 @@ import (
 	"os"
 )
 
-// Storage читает и пишет список задач в JSON-файл по пути path.
 type Storage struct {
 	path string
 }
 
-// NewStorage создаёт хранилище, работающее с файлом по пути path.
 func NewStorage(path string) *Storage {
 	return &Storage{path: path}
 }
 
-// Load читает задачи из файла. Если файла ещё нет, возвращает пустой список
-// без ошибки — это нормальная ситуация при первом запуске.
 func (s *Storage) Load() ([]Task, error) {
 	data, err := os.ReadFile(s.path)
 	if err != nil {
@@ -35,7 +31,6 @@ func (s *Storage) Load() ([]Task, error) {
 	return tasks, nil
 }
 
-// Save сохраняет список задач в файл в формате JSON с отступами.
 func (s *Storage) Save(tasks []Task) error {
 	data, err := json.MarshalIndent(tasks, "", "  ")
 	if err != nil {
