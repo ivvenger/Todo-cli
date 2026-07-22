@@ -6,21 +6,17 @@ import (
 	"testing"
 )
 
-// newTestStorage создаёт хранилище во временной директории теста.
-// Файл автоматически удаляется после завершения теста.
 func newTestStorage(t *testing.T) *Storage {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "tasks.json")
 	return NewStorage(path)
 }
 
-// mustAdd добавляет задачу и проваливает тест, если это не удалось.
-// Удобно для подготовки данных, когда сама ошибка добавления нам не интересна.
 func mustAdd(t *testing.T, s *Storage, title string) Task {
 	t.Helper()
 	added, err := s.Add(title)
 	if err != nil {
-		t.Fatalf("подготовка: не удалось добавить задачу %q: %v", title, err)
+		t.Fatalf("Не удалось добавить задачу %q: %v", title, err)
 	}
 	return added
 }
@@ -31,10 +27,10 @@ func TestNextID(t *testing.T) {
 		tasks []Task
 		want  int
 	}{
-		{"пустой список", nil, 1},
-		{"одна задача", []Task{{ID: 1}}, 2},
-		{"несколько подряд", []Task{{ID: 1}, {ID: 2}, {ID: 3}}, 4},
-		{"с пропусками — берём максимум", []Task{{ID: 1}, {ID: 5}, {ID: 3}}, 6},
+		{"Пустой список", nil, 1},
+		{"Одна задача", []Task{{ID: 1}}, 2},
+		{"Несколько подряд", []Task{{ID: 1}, {ID: 2}, {ID: 3}}, 4},
+		{"С пропусками — берём максимум", []Task{{ID: 1}, {ID: 5}, {ID: 3}}, 6},
 	}
 
 	for _, tt := range tests {
@@ -54,11 +50,11 @@ func TestFindIndex(t *testing.T) {
 		id   int
 		want int
 	}{
-		{"первый элемент", 1, 0},
-		{"средний элемент", 2, 1},
-		{"последний элемент", 3, 2},
-		{"не найдено", 99, -1},
-		{"пустой id", 0, -1},
+		{"Первый элемент", 1, 0},
+		{"Средний элемент", 2, 1},
+		{"Последний элемент", 3, 2},
+		{"Не найдено", 99, -1},
+		{"Пустой id", 0, -1},
 	}
 
 	for _, tt := range tests {
@@ -83,15 +79,15 @@ func TestFilterByStatus(t *testing.T) {
 		done    bool
 		wantIDs []int
 	}{
-		{"только выполненные", true, []int{2, 4}},
-		{"только невыполненные", false, []int{1, 3}},
+		{"Только выполненные", true, []int{2, 4}},
+		{"Только невыполненные", false, []int{1, 3}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := FilterByStatus(tasks, tt.done)
 			if len(got) != len(tt.wantIDs) {
-				t.Fatalf("получено %d задач, ожидалось %d", len(got), len(tt.wantIDs))
+				t.Fatalf("Получено %d задач, ожидалось %d", len(got), len(tt.wantIDs))
 			}
 			for i, id := range tt.wantIDs {
 				if got[i].ID != id {
@@ -105,20 +101,20 @@ func TestFilterByStatus(t *testing.T) {
 func TestAdd(t *testing.T) {
 	s := newTestStorage(t)
 
-	first, err := s.Add("первая задача")
+	first, err := s.Add("Первая задача")
 	if err != nil {
-		t.Fatalf("неожиданная ошибка: %v", err)
+		t.Fatalf("Ошибка: %v", err)
 	}
 	if first.ID != 1 {
 		t.Errorf("ID первой задачи = %d, ожидалось 1", first.ID)
 	}
 	if first.Done {
-		t.Error("новая задача не должна быть выполненной")
+		t.Error("Новая задача не должна быть выполненной")
 	}
 
 	second, err := s.Add("вторая задача")
 	if err != nil {
-		t.Fatalf("неожиданная ошибка: %v", err)
+		t.Fatalf("Ошибка: %v", err)
 	}
 	if second.ID != 2 {
 		t.Errorf("ID второй задачи = %d, ожидалось 2", second.ID)
@@ -129,11 +125,11 @@ func TestAddTrimsAndRejectsEmpty(t *testing.T) {
 	s := newTestStorage(t)
 
 	if _, err := s.Add("  дела  "); err != nil {
-		t.Fatalf("неожиданная ошибка: %v", err)
+		t.Fatalf("Ошибка: %v", err)
 	}
 	tasks, _ := s.All()
 	if tasks[0].Title != "дела" {
-		t.Errorf("Title = %q, ожидалось %q (пробелы должны обрезаться)", tasks[0].Title, "дела")
+		t.Errorf("Title = %q, ожидалось %q ", tasks[0].Title, "дела")
 	}
 
 	for _, empty := range []string{"", "   ", "\t\n"} {
@@ -148,12 +144,12 @@ func TestComplete(t *testing.T) {
 	mustAdd(t, s, "задача")
 
 	if err := s.Complete(1); err != nil {
-		t.Fatalf("неожиданная ошибка: %v", err)
+		t.Fatalf("Ошибка: %v", err)
 	}
 
 	tasks, _ := s.All()
 	if !tasks[0].Done {
-		t.Error("после Complete задача должна быть выполненной")
+		t.Error("После Complete задача должна быть выполненной!")
 	}
 }
 
@@ -162,7 +158,7 @@ func TestCompleteNotFound(t *testing.T) {
 
 	err := s.Complete(42)
 	if !errors.Is(err, ErrTaskNotFound) {
-		t.Errorf("ожидалась ErrTaskNotFound, получено %v", err)
+		t.Errorf("Ожидалась ErrTaskNotFound, получено %v", err)
 	}
 }
 
@@ -172,15 +168,15 @@ func TestDelete(t *testing.T) {
 	mustAdd(t, s, "вторая")
 
 	if err := s.Delete(1); err != nil {
-		t.Fatalf("неожиданная ошибка: %v", err)
+		t.Fatalf("Ошибка: %v", err)
 	}
 
 	tasks, _ := s.All()
 	if len(tasks) != 1 {
-		t.Fatalf("осталось %d задач, ожидалась 1", len(tasks))
+		t.Fatalf("Осталось %d задач, ожидалась 1", len(tasks))
 	}
 	if tasks[0].ID != 2 {
-		t.Errorf("осталась задача с ID %d, ожидалось 2", tasks[0].ID)
+		t.Errorf("Осталась задача с ID %d, ожидалось 2", tasks[0].ID)
 	}
 }
 
@@ -189,6 +185,6 @@ func TestDeleteNotFound(t *testing.T) {
 
 	err := s.Delete(42)
 	if !errors.Is(err, ErrTaskNotFound) {
-		t.Errorf("ожидалась ErrTaskNotFound, получено %v", err)
+		t.Errorf("Ожидалась ErrTaskNotFound, получено %v", err)
 	}
 }
