@@ -7,7 +7,6 @@ import (
 )
 
 func TestLoadMissingFileReturnsEmpty(t *testing.T) {
-	// Файл, которого точно нет.
 	path := filepath.Join(t.TempDir(), "no-such-file.json")
 	s := NewStorage(path)
 

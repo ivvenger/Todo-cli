@@ -6,16 +6,12 @@ import (
 	"testing"
 )
 
-// newTestStorage создаёт хранилище во временной директории теста.
-// Файл автоматически удаляется после завершения теста.
 func newTestStorage(t *testing.T) *Storage {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "tasks.json")
 	return NewStorage(path)
 }
 
-// mustAdd добавляет задачу и проваливает тест, если это не удалось.
-// Удобно для подготовки данных, когда сама ошибка добавления нам не интересна.
 func mustAdd(t *testing.T, s *Storage, title string) Task {
 	t.Helper()
 	added, err := s.Add(title)

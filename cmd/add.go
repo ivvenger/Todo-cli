@@ -1,4 +1,3 @@
-// Package cmd содержит команды CLI todo: add, list, done, rm.
 package cmd
 
 import (

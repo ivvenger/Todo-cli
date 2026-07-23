@@ -2,7 +2,6 @@ package task
 
 import "time"
 
-// Task — одна задача в списке дел.
 type Task struct {
 	ID        int       `json:"id"`
 	Title     string    `json:"title"`
