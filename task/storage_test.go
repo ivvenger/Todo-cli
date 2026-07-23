@@ -15,7 +15,7 @@ func TestLoadMissingFileReturnsEmpty(t *testing.T) {
 		t.Fatalf("Load несуществующего файла не должен возвращать ошибку, получено: %v", err)
 	}
 	if len(tasks) != 0 {
-		t.Errorf("ожидался пустой список, получено %d задач", len(tasks))
+		t.Errorf("Ожидался пустой список, получено %d задач", len(tasks))
 	}
 }
 
@@ -38,11 +38,11 @@ func TestSaveThenLoad(t *testing.T) {
 	}
 
 	if len(got) != len(want) {
-		t.Fatalf("загружено %d задач, ожидалось %d", len(got), len(want))
+		t.Fatalf("Загружено %d задач, ожидалось %d", len(got), len(want))
 	}
 	for i := range want {
 		if got[i].ID != want[i].ID || got[i].Title != want[i].Title || got[i].Done != want[i].Done {
-			t.Errorf("задача %d = %+v, ожидалось %+v", i, got[i], want[i])
+			t.Errorf("Задача %d = %+v, ожидалось %+v", i, got[i], want[i])
 		}
 	}
 }
